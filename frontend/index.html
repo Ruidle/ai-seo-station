@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI-SEO 独立站优化助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800">
+  <div class="max-w-5xl mx-auto p-4">
+    <header class="mb-5">
+      <h1 class="text-2xl font-bold text-slate-900">🚀 AI-SEO 独立站优化助手</h1>
+      <p class="text-sm text-slate-500">面向外贸独立站 SEO 运营 · 站内站外完整工作流</p>
+      <div class="flex flex-wrap items-center gap-2 mt-3">
+        <span class="text-xs text-slate-400">数据互通：</span>
+        <label class="bg-slate-700 text-white px-3 py-1.5 rounded-lg text-sm cursor-pointer">⬆ 导入
+          <input id="importFile" type="file" accept=".csv,.json,.xlsx" class="hidden" onchange="doImport()" />
+        </label>
+        <select id="importEntity" class="border rounded-lg px-2 py-1.5 text-sm">
+          <option value="keywords">关键词</option><option value="backlinks">外链</option><option value="metrics">指标</option>
+        </select>
+        <span class="text-slate-300">|</span>
+        <select id="exportEntity" class="border rounded-lg px-2 py-1.5 text-sm">
+          <option value="all">全部</option><option value="keywords">关键词</option><option value="backlinks">外链</option><option value="metrics">指标</option><option value="reports">报告</option><option value="uploads">文件</option>
+        </select>
+        <select id="exportFmt" class="border rounded-lg px-2 py-1.5 text-sm">
+          <option value="csv">CSV</option><option value="json">JSON</option><option value="xlsx">XLSX</option>
+        </select>
+        <button onclick="doExport()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-sm">⬇ 导出</button>
+        <button onclick="dlTemplate()" class="bg-white border px-3 py-1.5 rounded-lg text-sm">下载模板</button>
+      </div>
+    </header>
+
+    <nav class="flex flex-wrap gap-2 mb-5" id="tabs">
+      <button data-tab="kw" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">① 关键词挖掘</button>
+      <button data-tab="comp" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">② 竞品解析</button>
+      <button data-tab="onpage" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">③ 站内优化</button>
+      <button data-tab="link" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">④ 外链台账</button>
+      <button data-tab="report" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">⑤ 指标 & 报告</button>
+      <button data-tab="files" class="tab px-4 py-2 rounded-lg bg-white shadow text-sm font-medium">⑥ 文件中心</button>
+    </nav>
+
+    <!-- ① 关键词挖掘 -->
+    <section data-panel="kw" class="panel bg-white rounded-xl shadow p-5">
+      <h2 class="font-semibold mb-3">AI 关键词挖掘拓展</h2>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <input id="kwSeed" placeholder="种子词，如 led street light / 外贸独立站" class="flex-1 border rounded-lg px-3 py-2 text-sm min-w-[200px]" />
+        <select id="kwLang" class="border rounded-lg px-2 text-sm">
+          <option value="en">英文</option><option value="zh">中文</option><option value="ru">俄语</option><option value="es">西班牙语</option><option value="ar">阿拉伯语</option><option value="de">德语</option><option value="fr">法语</option><option value="ja">日语</option><option value="ko">韩语</option><option value="pt">葡萄牙语</option><option value="vi">越南语</option><option value="th">泰语</option>
+        </select>
+        <label class="flex items-center gap-1 text-sm text-slate-500 whitespace-nowrap">
+          <input id="kwIndustry" type="checkbox" checked class="w-4 h-4" /> 行业化
+        </label>
+        <button onclick="expandKw()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">拓展</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-2">行业化：植入外贸 / 跨境 / 采购代理赛道词根，拓词更贴合虎翼系独立站；语言用于指定输出语种。</p>
+      <div id="kwResult" class="text-sm text-slate-600"></div>
+    </section>
+
+    <!-- ② 竞品解析 -->
+    <section data-panel="comp" class="panel bg-white rounded-xl shadow p-5 hidden">
+      <h2 class="font-semibold mb-3">竞品网站解析（TDK + 高频词）</h2>
+      <div class="flex gap-2 mb-3">
+        <input id="compUrl" placeholder="竞品 URL，如 https:// competitor.com" class="flex-1 border rounded-lg px-3 py-2 text-sm" />
+        <button onclick="parseComp()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">解析</button>
+      </div>
+      <div id="compResult" class="text-sm text-slate-600"></div>
+    </section>
+
+    <!-- ③ 站内优化 -->
+    <section data-panel="onpage" class="panel bg-white rounded-xl shadow p-5 hidden">
+      <h2 class="font-semibold mb-3">站内页面优化（TDK 生成 + 缺陷检测 + 跨境信任信号）</h2>
+      <div class="flex flex-wrap gap-2 mb-2">
+        <input id="onUrl" placeholder="页面 URL（可选）" class="flex-1 border rounded-lg px-3 py-2 text-sm min-w-[200px]" />
+        <select id="onLang" class="border rounded-lg px-2 text-sm">
+          <option value="en">英文</option><option value="zh">中文</option><option value="ru">俄语</option><option value="es">西班牙语</option><option value="ar">阿拉伯语</option><option value="de">德语</option><option value="ja">日语</option><option value="ko">韩语</option><option value="pt">葡萄牙语</option>
+        </select>
+        <select id="onType" class="border rounded-lg px-2 text-sm">
+          <option value="homepage">首页</option><option value="product">产品页</option><option value="category">分类页</option><option value="blog">博客页</option><option value="landing">落地页</option>
+        </select>
+        <button onclick="auditUrl()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">按 URL 审计</button>
+      </div>
+      <details class="mb-3">
+        <summary class="text-sm text-indigo-600 cursor-pointer">或粘贴 HTML 源码</summary>
+        <textarea id="onHtml" rows="4" placeholder="<html>...</html>" class="w-full border rounded-lg p-2 text-xs mt-2"></textarea>
+        <div class="flex flex-wrap gap-2 mt-2">
+          <select id="onLang2" class="border rounded-lg px-2 text-sm">
+            <option value="en">英文</option><option value="zh">中文</option><option value="ru">俄语</option><option value="es">西班牙语</option><option value="de">德语</option><option value="ja">日语</option><option value="pt">葡萄牙语</option>
+          </select>
+          <select id="onType2" class="border rounded-lg px-2 text-sm">
+            <option value="homepage">首页</option><option value="product">产品页</option><option value="category">分类页</option><option value="blog">博客页</option><option value="landing">落地页</option>
+          </select>
+          <button onclick="auditHtml()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">按 HTML 审计</button>
+        </div>
+      </details>
+      <div id="onResult" class="text-sm text-slate-600"></div>
+    </section>
+
+    <!-- ④ 外链台账 -->
+    <section data-panel="link" class="panel bg-white rounded-xl shadow p-5 hidden">
+      <h2 class="font-semibold mb-3">站外外链台账</h2>
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-3 text-sm">
+        <input id="blSite" placeholder="站点" class="border rounded px-2 py-1" />
+        <input id="blUrl" placeholder="外链 URL" class="border rounded px-2 py-1" />
+        <input id="blAnchor" placeholder="锚文本" class="border rounded px-2 py-1" />
+        <input id="blType" placeholder="类型" class="border rounded px-2 py-1" value="guest-post" />
+        <input id="blStatus" placeholder="状态" class="border rounded px-2 py-1" value="planned" />
+        <button onclick="addBacklink()" class="bg-emerald-600 text-white rounded px-2">添加</button>
+      </div>
+      <input id="blNote" placeholder="备注（可选）" class="w-full border rounded px-2 py-1 text-sm mb-3" />
+      <h3 class="font-medium text-sm mb-2">AI 生成外链博客素材</h3>
+      <div class="flex gap-2 mb-3 text-sm">
+        <input id="blTopic" placeholder="主题，如 solar water pump" class="flex-1 border rounded px-2 py-1" />
+        <input id="blTarget" placeholder="目标 URL（可选）" class="flex-1 border rounded px-2 py-1" />
+        <button onclick="genArticle()" class="bg-indigo-600 text-white px-3 rounded">生成</button>
+      </div>
+      <div id="blArticle" class="text-sm text-slate-600 mb-3"></div>
+      <div id="blList" class="text-sm"></div>
+    </section>
+
+    <!-- ⑤ 指标 & 报告 -->
+    <section data-panel="report" class="panel bg-white rounded-xl shadow p-5 hidden">
+      <h2 class="font-semibold mb-3">指标录入 & SEO 分析报告</h2>
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-3 text-sm">
+        <input id="mSite" placeholder="站点" class="border rounded px-2 py-1" />
+        <input id="mDate" placeholder="日期 2026-08-16" class="border rounded px-2 py-1" />
+        <input id="mIdx" placeholder="收录量" class="border rounded px-2 py-1" />
+        <input id="mRank" placeholder="平均排名" class="border rounded px-2 py-1" />
+        <input id="mTraffic" placeholder="流量" class="border rounded px-2 py-1" />
+        <input id="mKw" placeholder="覆盖词数" class="border rounded px-2 py-1" />
+      </div>
+      <div class="flex gap-2 mb-3">
+        <button onclick="addMetric()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm">录入指标</button>
+        <button onclick="genReport()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm">生成报告</button>
+      </div>
+      <div id="reportResult" class="text-sm text-slate-600"></div>
+    </section>
+
+    <!-- ⑥ 文件中心 -->
+    <section data-panel="files" class="panel bg-white rounded-xl shadow p-5 hidden">
+      <h2 class="font-semibold mb-3">文件中心（上传解析 + 内容 SEO 分析）</h2>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <select id="fileLang" class="border rounded-lg px-2 text-sm">
+          <option value="en">英文</option><option value="zh">中文</option><option value="ru">俄语</option><option value="es">西班牙语</option><option value="de">德语</option><option value="ja">日语</option><option value="pt">葡萄牙语</option>
+        </select>
+        <select id="fileType" class="border rounded-lg px-2 text-sm">
+          <option value="blog">博客页</option><option value="product">产品页</option><option value="category">分类页</option><option value="homepage">首页</option><option value="landing">落地页</option>
+        </select>
+        <span class="text-xs text-slate-400 self-center">语言用于拓词/审计 · 类型用于内容审计</span>
+      </div>
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center mb-3">
+        <p class="text-sm text-slate-500 mb-2">支持格式：PDF · DOCX · TXT · MD · HTML · CSV · XLSX · RTF · ODT</p>
+        <label class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm cursor-pointer inline-block">
+          选择 / 拖拽文件上传
+          <input id="fileInput" type="file" class="hidden" onchange="uploadFile()" />
+        </label>
+        <span id="uploadHint" class="text-xs text-slate-400 ml-2"></span>
+      </div>
+      <div id="fileList" class="text-sm mb-3"></div>
+      <div id="fileResult" class="text-sm text-slate-600"></div>
+    </section>
+  </div>
+
+  <script>
+    // tab 切换
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.onclick = () => {
+      document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+      document.querySelector(`[data-panel="${t.dataset.tab}"]`).classList.remove('hidden');
+      tabs.forEach(x => x.classList.remove('bg-indigo-600','text-white'));
+      t.classList.add('bg-indigo-600','text-white');
+      if (t.dataset.tab === 'link') loadBacklinks();
+      if (t.dataset.tab === 'files') loadFiles();
+    });
+    tabs[0].classList.add('bg-indigo-600','text-white');
+
+    async function postJSON(url, body) {
+      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      return r.json();
+    }
+    const esc = s => (s==null?'':String(s)).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+    async function expandKw() {
+      const seed = document.getElementById('kwSeed').value.trim();
+      const lang = document.getElementById('kwLang').value;
+      const industry = document.getElementById('kwIndustry').checked;
+      if (!seed) return alert('请输入种子词');
+      const res = await postJSON('/api/keywords/expand', {seed, lang, industry});
+      if (res.error) return document.getElementById('kwResult').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      document.getElementById('kwResult').innerHTML =
+        `<p class="mb-2 text-xs text-slate-400">来源：${esc(res.source)}</p>` +
+        res.keywords.map(k => `<span class="inline-block bg-indigo-50 text-indigo-700 rounded px-2 py-1 mr-1 mb-1">${esc(k)}</span>`).join('');
+    }
+
+    async function parseComp() {
+      const url = document.getElementById('compUrl').value.trim();
+      if (!url) return alert('请输入竞品 URL');
+      const res = await postJSON('/api/competitor/parse', {url});
+      if (res.error) return document.getElementById('compResult').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      document.getElementById('compResult').innerHTML = `
+        <p><b>Title:</b> ${esc(res.title)}</p>
+        <p><b>Description:</b> ${esc(res.description)}</p>
+        <p><b>Keywords:</b> ${esc(res.keywords)}</p>
+        <p><b>Canonical:</b> ${esc(res.canonical)}</p>
+        <p><b>H1:</b> ${esc((res.h1||[]).join(' / '))}</p>
+        <p class="mt-2"><b>高频词：</b> ${(res.top_words||[]).map(w=>`<span class="inline-block bg-slate-100 rounded px-2 py-0.5 mr-1 mb-1">${esc(w)}</span>`).join('')}</p>`;
+    }
+
+    async function auditUrl() { _audit({url: document.getElementById('onUrl').value.trim(), target_lang: document.getElementById('onLang').value, page_type: document.getElementById('onType').value}); }
+    async function auditHtml() { _audit({html: document.getElementById('onHtml').value, target_lang: document.getElementById('onLang2').value, page_type: document.getElementById('onType2').value}); }
+    async function _audit(body) {
+      if (!body.url && !body.html) return alert('请提供 URL 或 HTML');
+      const res = await postJSON('/api/onpage/audit', body);
+      if (res.error) return document.getElementById('onResult').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      const ts = res.trust_signals || {};
+      document.getElementById('onResult').innerHTML = `
+        <p class="text-xs text-slate-400 mb-1">页面类型：${esc(res.page_type)} · 目标语言：${esc(res.target_lang)} · 综合评分 <b class="text-indigo-600">${res.seo_score}/100</b></p>
+        <p><b>现有 Title：</b> ${esc(res.title)}</p>
+        <p><b>现有 Description：</b> ${esc(res.description)}</p>
+        <p class="mt-2"><b>缺陷检测：</b></p>
+        <ul class="list-disc pl-5 text-red-600">${(res.defects||[]).map(d=>`<li>${esc(d)}</li>`).join('') || '<li class="text-emerald-600">未发现明显缺陷</li>'}</ul>
+        <p class="mt-2"><b>建议 Title：</b> <code class="bg-slate-100 px-1">${esc(res.suggested_title)}</code></p>
+        <p><b>建议 Description：</b> <code class="bg-slate-100 px-1">${esc(res.suggested_description)}</code></p>
+        <p class="mt-2"><b>整改建议：</b></p>
+        <ul class="list-disc pl-5">${(res.suggestions||[]).map(s=>`<li>${esc(s)}</li>`).join('')}</ul>
+        <p class="mt-3"><b>跨境信任信号（${ts.score||0}/100）：</b></p>
+        <p class="text-emerald-700">命中：${(ts.present||[]).map(p=>`<span class="inline-block bg-emerald-50 rounded px-2 py-0.5 mr-1 mb-1">${esc(p)}</span>`).join('') || '无'}</p>
+        <p class="text-red-600">缺失：${(ts.missing||[]).map(p=>`<span class="inline-block bg-red-50 rounded px-2 py-0.5 mr-1 mb-1">${esc(p)}</span>`).join('') || '无'}</p>`;
+    }
+
+    async function addBacklink() {
+      const body = {site: v('blSite'), url: v('blUrl'), anchor: v('blAnchor'), type: v('blType'), status: v('blStatus'), note: v('blNote')};
+      const res = await postJSON('/api/backlinks', body);
+      if (res.ok) { ['blSite','blUrl','blAnchor','blType','blStatus','blNote'].forEach(i=>document.getElementById(i).value=''); document.getElementById('blType').value='guest-post'; document.getElementById('blStatus').value='planned'; loadBacklinks(); }
+    }
+    async function loadBacklinks() {
+      const rows = await (await fetch('/api/backlinks')).json();
+      document.getElementById('blList').innerHTML = rows.length ? `<table class="w-full text-xs mt-2 border">
+        <tr class="bg-slate-50"><th class="border p-1">#</th><th class="border p-1">站点</th><th class="border p-1">URL</th><th class="border p-1">锚文本</th><th class="border p-1">类型</th><th class="border p-1">状态</th><th class="border p-1"></th></tr>
+        ${rows.map(r=>`<tr><td class="border p-1">${r.id}</td><td class="border p-1">${esc(r.site)}</td><td class="border p-1">${esc(r.url)}</td><td class="border p-1">${esc(r.anchor)}</td><td class="border p-1">${esc(r.type)}</td><td class="border p-1">${esc(r.status)}</td><td class="border p-1"><button onclick="delBl(${r.id})" class="text-red-500">删</button></td></tr>`).join('')}
+      </table>` : '<p class="text-slate-400 mt-2">暂无外链记录</p>';
+    }
+    async function delBl(id) { await fetch('/api/backlinks/'+id, {method:'DELETE'}); loadBacklinks(); }
+
+    async function genArticle() {
+      const topic = document.getElementById('blTopic').value.trim();
+      if (!topic) return alert('请输入主题');
+      const res = await postJSON('/api/backlinks/generate', {topic, anchor: topic, target_url: document.getElementById('blTarget').value.trim()});
+      if (res.error) return document.getElementById('blArticle').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      document.getElementById('blArticle').innerHTML = `
+        <p class="text-xs text-slate-400 mb-1">来源：${esc(res.source)}</p>
+        <p><b>标题：</b> ${esc(res.title)}</p>
+        <p><b>大纲：</b></p><ul class="list-disc pl-5">${(res.outline||[]).map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
+        <p class="mt-2"><b>正文：</b></p><pre class="bg-slate-50 p-2 whitespace-pre-wrap">${esc(res.content)}</pre>`;
+    }
+
+    async function addMetric() {
+      const body = {site: v('mSite'), date: v('mDate'), indexed: +v('mIdx')||0, avg_ranking: +v('mRank')||0, traffic: +v('mTraffic')||0, kw_count: +v('mKw')||0};
+      const res = await postJSON('/api/metrics', body);
+      if (res.ok) { ['mSite','mDate','mIdx','mRank','mTraffic','mKw'].forEach(i=>document.getElementById(i).value=''); }
+      else alert(res.error||'录入失败');
+    }
+    async function genReport() {
+      const site = document.getElementById('mSite').value.trim();
+      const res = await postJSON('/api/report/generate', {site});
+      if (res.error) return document.getElementById('reportResult').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      document.getElementById('reportResult').innerHTML = `
+        <p class="mb-2">综合评分：<b class="text-indigo-600">${res.score}/100</b>
+          <button onclick="downloadReport()" class="ml-3 bg-slate-700 text-white px-3 py-1 rounded text-xs">下载 MD</button></p>
+        <pre class="bg-slate-50 p-3 whitespace-pre-wrap max-h-96 overflow-auto">${esc(res.markdown)}</pre>`;
+      window.__lastReport = res.markdown;
+    }
+    function downloadReport() {
+      const blob = new Blob([window.__lastReport||''], {type:'text/markdown'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'seo-report.md'; a.click();
+    }
+    // ---------------- ⑥ 文件中心 ----------------
+    async function uploadFile() {
+      const inp = document.getElementById('fileInput');
+      if (!inp.files.length) return;
+      document.getElementById('uploadHint').textContent = '解析中…';
+      const fd = new FormData();
+      fd.append('file', inp.files[0]);
+      const r = await fetch('/api/files/upload', {method: 'POST', body: fd});
+      const res = await r.json();
+      document.getElementById('uploadHint').textContent = '';
+      if (res.error) return document.getElementById('fileResult').innerHTML = `<span class="text-red-500">${esc(res.error)}</span>`;
+      document.getElementById('fileResult').innerHTML =
+        `<p class="text-xs text-slate-400 mb-1">已解析 ${esc(res.filename)}（${res.char_count} 字符）</p>` +
+        `<pre class="bg-slate-50 p-2 whitespace-pre-wrap max-h-60 overflow-auto">${esc(res.preview)}</pre>` +
+        `<div class="mt-2 flex gap-2">` +
+        `<button onclick="docKeywords(${res.id})" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm">提取关键词</button>` +
+        `<button onclick="contentAudit(${res.id})" class="bg-emerald-600 text-white px-3 py-1.5 rounded text-sm">内容 SEO 审计</button></div>`;
+      await loadFiles();
+    }
+
+    async function loadFiles() {
+      const rows = await (await fetch('/api/files')).json();
+      document.getElementById('fileList').innerHTML = rows.length ? `<table class="w-full text-xs mt-2 border">
+        <tr class="bg-slate-50"><th class="border p-1">#</th><th class="border p-1">文件名</th><th class="border p-1">类型</th><th class="border p-1">字符</th><th class="border p-1">时间</th><th class="border p-1">操作</th></tr>
+        ${rows.map(r => `<tr><td class="border p-1">${r.id}</td><td class="border p-1">${esc(r.filename)}</td><td class="border p-1">${esc(r.ext)}</td><td class="border p-1">${r.chars}</td><td class="border p-1">${esc(r.created_at)}</td><td class="border p-1"><button onclick="docKeywords(${r.id})" class="text-indigo-600">拓词</button> <button onclick="contentAudit(${r.id})" class="text-emerald-600">审计</button> <button onclick="delFile(${r.id})" class="text-red-500">删</button></td></tr>`).join('')}
+      </table>` : '<p class="text-slate-400 mt-2">暂无上传文件</p>';
+    }
+
+    async function docKeywords(id) {
+      const res = await postJSON('/api/files/keywords', {id, lang: document.getElementById('fileLang').value, industry: true});
+      if (res.error) return alert(res.error);
+      const box = document.getElementById('fileResult');
+      box.innerHTML += `<div class="mt-3 p-3 bg-indigo-50 rounded"><p class="text-xs text-slate-400 mb-1">文档关键词 · 来源 ${esc(res.source)}</p>${res.keywords.map(k => `<span class="inline-block bg-indigo-100 text-indigo-700 rounded px-2 py-1 mr-1 mb-1">${esc(k)}</span>`).join('')}</div>`;
+    }
+
+    async function contentAudit(id) {
+      const kw = prompt('目标关键词（可留空，让 AI 自动判断主题词）') || '';
+      const res = await postJSON('/api/files/audit', {id, keyword: kw, page_type: document.getElementById('fileType').value});
+      if (res.error) return alert(res.error);
+      const box = document.getElementById('fileResult');
+      box.innerHTML += `<div class="mt-3 p-3 bg-emerald-50 rounded">
+        <p>SEO 评分：<b class="text-emerald-700">${res.seo_score}/100</b> · 来源 ${esc(res.source)}</p>
+        <p class="mt-1"><b>关键词密度：</b>${esc(res.keyword_density_note)}</p>
+        <p><b>可读性：</b>${esc(res.readability_note)}</p>
+        <p><b>结构：</b>${esc(res.structure_note)}</p>
+        <p class="mt-1"><b>问题：</b></p><ul class="list-disc pl-5 text-red-600">${(res.issues || []).map(i => `<li>${esc(i)}</li>`).join('')}</ul>
+        <p class="mt-1"><b>建议：</b></p><ul class="list-disc pl-5">${(res.suggestions || []).map(s => `<li>${esc(s)}</li>`).join('')}</ul>
+        <p class="mt-1"><b>重写开头：</b></p><pre class="bg-white p-2 whitespace-pre-wrap">${esc(res.optimized_intro)}</pre>
+      </div>`;
+    }
+
+    async function delFile(id) {
+      if (!confirm('删除该文件及其解析内容？')) return;
+      await fetch('/api/files/' + id, {method: 'DELETE'});
+      await loadFiles();
+    }
+
+    // ---------------- 一键导入 / 导出 ----------------
+    async function doImport() {
+      const inp = document.getElementById('importFile');
+      if (!inp.files.length) return alert('请先选择 CSV/JSON/XLSX 文件');
+      const fd = new FormData();
+      fd.append('file', inp.files[0]);
+      fd.append('entity', document.getElementById('importEntity').value);
+      const r = await fetch('/api/import', {method: 'POST', body: fd});
+      const res = await r.json();
+      if (res.error) return alert(res.error);
+      alert(`导入成功：${res.imported} 条（共解析 ${res.total_rows} 行）`);
+    }
+
+    function doExport() {
+      const e = document.getElementById('exportEntity').value;
+      const fmt = document.getElementById('exportFmt').value;
+      window.open(`/api/export?entity=${e}&fmt=${fmt}`);
+    }
+
+    function dlTemplate() {
+      const e = document.getElementById('importEntity').value;
+      window.open(`/api/import/template?entity=${e}&fmt=csv`);
+    }
+
+    const v = id => document.getElementById(id).value.trim();
+  </script>
+</body>
+</html>
