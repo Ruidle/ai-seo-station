@@ -10,15 +10,15 @@
 
 **主界面：6 大模块 + 数据导入导出工具栏**
 
-![主界面](docs/screenshot-1-home.png)
+![主界面](https://cdn.jsdelivr.net/gh/Ruidle/ai-seo-station@main/docs/screenshot-1-home.png)
 
 **关键词挖掘：一个种子词批量生成行业化长尾词（支持 11 个语种）**
 
-![关键词挖掘结果](docs/screenshot-2-keywords.png)
+![关键词挖掘结果](https://cdn.jsdelivr.net/gh/Ruidle/ai-seo-station@main/docs/screenshot-2-keywords.png)
 
 **站内优化：页面综合评分 + 缺陷检测 + TDK 改写建议 + 跨境信任信号体检**
 
-![站内审计报告](docs/screenshot-3-audit.png)
+![站内审计报告](https://cdn.jsdelivr.net/gh/Ruidle/ai-seo-station@main/docs/screenshot-3-audit.png)
 
 ---
 
