@@ -6,6 +6,23 @@
 
 ---
 
+## 📌 开源仓库
+
+| 项 | 信息 |
+| --- | --- |
+| **仓库地址** | **https://github.com/Ruidle/ai-seo-station** |
+| **许可证** | MIT License（允许商用 / 修改 / 分发，保留版权声明） |
+| **主要语言** | Python（后端）+ 原生 JavaScript（前端） |
+| **提交历史** | 3 次提交，含初始版本、README 与 MIT LICENSE、截图 CDN 优化 |
+
+```bash
+git clone https://github.com/Ruidle/ai-seo-station.git
+```
+
+> 本项目已完整开源，采用 MIT 协议。欢迎 Fork、二次开发与商业使用；使用或衍生时请保留原仓库出处与 LICENSE 声明。
+
+---
+
 ## 📸 项目截图
 
 **主界面：6 大模块 + 数据导入导出工具栏**
@@ -115,3 +132,5 @@ ai-seo-station/
 ## 📄 License
 
 [MIT](LICENSE)
+
+本项目开源托管于 **https://github.com/Ruidle/ai-seo-station** ，遵循 MIT 许可证。
